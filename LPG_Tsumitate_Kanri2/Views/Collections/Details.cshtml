@@ -106,6 +106,28 @@
 
 @if (!session.IsCompleted)
 {
+    var addable = ViewBag.AddableEmployees as List<LPG_Tsumitate_Kanri2.Models.Entities.Employee>;
+    <div class="mb-4">
+        @if (addable != null && addable.Any())
+        {
+            <form asp-action="AddEmployee" asp-route-id="@session.SessionId" method="post"
+                  class="d-flex flex-wrap gap-2 align-items-center">
+                @Html.AntiForgeryToken()
+                <select name="employeeId" class="form-select form-select-sm w-auto">
+                    @foreach (var emp in addable)
+                    {
+                        <option value="@emp.EmployeeId">@emp.EmployeeNo　@emp.FullName</option>
+                    }
+                </select>
+                <button type="submit" class="btn btn-sm btn-outline-primary">社員を追加</button>
+            </form>
+        }
+        else
+        {
+            <p class="text-muted small mb-0">追加できる社員はいません。</p>
+        }
+    </div>
+
     <form asp-action="Complete" asp-route-id="@session.SessionId" method="post"
           onsubmit="return confirm('締め切りますか？締め切り後は変更できません。徴収済みの合算金額が収支帳簿に自動入金されます。')">
         @Html.AntiForgeryToken()

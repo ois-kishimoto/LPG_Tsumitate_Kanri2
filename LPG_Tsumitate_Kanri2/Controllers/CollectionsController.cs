@@ -120,7 +120,49 @@ public class CollectionsController : Controller
             PendingCount = session.CollectionRecords.Count(r => !r.IsCollected && !r.IsExcluded),
             ExcludedCount = session.CollectionRecords.Count(r => r.IsExcluded)
         };
+
+        var registeredIds = session.CollectionRecords.Select(r => r.EmployeeId).ToHashSet();
+        ViewBag.AddableEmployees = await _db.Employees
+            .Where(e => e.IsActive && !e.IsOnLeave && !registeredIds.Contains(e.EmployeeId))
+            .OrderBy(e => e.EmployeeNo)
+            .ToListAsync();
+
         return View(vm);
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddEmployee(int id, int employeeId)
+    {
+        var session = await _db.CollectionSessions
+            .Include(s => s.SavingsType)
+            .FirstOrDefaultAsync(s => s.SessionId == id);
+        if (session == null || session.IsCompleted) return BadRequest();
+
+        var employee = await _db.Employees.FindAsync(employeeId);
+        if (employee == null || !employee.IsActive || employee.IsOnLeave) return BadRequest();
+
+        bool exists = await _db.CollectionRecords
+            .AnyAsync(r => r.SessionId == id && r.EmployeeId == employeeId);
+        if (exists) return BadRequest();
+
+        var asOf = new DateOnly(session.Year, session.Month, 1);
+        var rules = await _db.ContributionAmountRules
+            .Where(r => r.SavingsTypeId == session.SavingsTypeId
+                && r.ValidFrom <= asOf
+                && (r.ValidTo == null || r.ValidTo >= asOf))
+            .OrderBy(r => r.Priority)
+            .ToListAsync();
+
+        var record = new CollectionRecord
+        {
+            SessionId = id,
+            EmployeeId = employeeId,
+            ExpectedAmount = _calculator.Calculate(employee, rules, asOf)
+        };
+        _db.CollectionRecords.Add(record);
+        await _db.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Details), new { id });
     }
 
     [HttpPost, ValidateAntiForgeryToken]
