@@ -79,6 +79,18 @@ public class ReceiptsController : Controller
         if (!System.IO.File.Exists(filePath)) return NotFound();
 
         var stream = System.IO.File.OpenRead(filePath);
+        return File(stream, receipt.ContentType);
+    }
+
+    public async Task<IActionResult> Download(int id)
+    {
+        var receipt = await _db.Receipts.FindAsync(id);
+        if (receipt == null) return NotFound();
+
+        var filePath = Path.Combine(_env.ContentRootPath, "App_Data", "receipts", receipt.StoredFileName);
+        if (!System.IO.File.Exists(filePath)) return NotFound();
+
+        var stream = System.IO.File.OpenRead(filePath);
         return File(stream, receipt.ContentType, receipt.OriginalFileName);
     }
 

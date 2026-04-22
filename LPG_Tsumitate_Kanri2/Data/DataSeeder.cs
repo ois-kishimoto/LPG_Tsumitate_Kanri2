@@ -8,36 +8,47 @@ public static class DataSeeder
 {
     public static async Task SeedAsync(AppDbContext db, ContributionCalculator calculator)
     {
-        // 既にデータがある場合はスキップ
         if (await db.Employees.AnyAsync()) return;
 
         // ── 社員 ──────────────────────────────────────────────────────────────
         var employees = new List<Employee>
         {
-            new() { EmployeeNo = "E001", FullName = "山田 太郎",   HireDate = new DateOnly(2018, 4, 1),  EmploymentType = "正社員", PositionCategory = "役職者", BirthDate = new DateOnly(1970, 5, 15) },
-            new() { EmployeeNo = "E002", FullName = "佐藤 花子",   HireDate = new DateOnly(2020, 10, 1), EmploymentType = "正社員", PositionCategory = "一般職", BirthDate = new DateOnly(1990, 3, 22) },
-            new() { EmployeeNo = "E003", FullName = "鈴木 一郎",   HireDate = new DateOnly(2025, 1, 6),  EmploymentType = "正社員", PositionCategory = "一般職", BirthDate = new DateOnly(1998, 8, 10) },
-            new() { EmployeeNo = "E004", FullName = "田中 美咲",   HireDate = new DateOnly(2019, 7, 1),  EmploymentType = "パート",  PositionCategory = "一般職", BirthDate = new DateOnly(1985, 11, 3) },
-            new() { EmployeeNo = "E005", FullName = "伊藤 健二",   HireDate = new DateOnly(2016, 4, 1),  EmploymentType = "正社員", PositionCategory = "役職者", BirthDate = new DateOnly(1966, 4, 28) },
-            new() { EmployeeNo = "E006", FullName = "渡辺 さくら", HireDate = new DateOnly(2022, 6, 1),  EmploymentType = "パート",  PositionCategory = "一般職", BirthDate = new DateOnly(2000, 1, 17) },
+            new() { EmployeeNo = "21", FullName = "儀保 清美",     HireDate = new DateOnly(1990,  6,  4), BirthDate = new DateOnly(1965, 10, 15), EmploymentType = "正社員", PositionCategory = "役職者" },
+            new() { EmployeeNo = "43", FullName = "辺土名 秀諭",   HireDate = new DateOnly(1990,  9, 20), BirthDate = new DateOnly(1966,  8,  4), EmploymentType = "正社員", PositionCategory = "役職者" },
+            new() { EmployeeNo = "44", FullName = "佐伯 博史",     HireDate = new DateOnly(2003, 11,  1), BirthDate = new DateOnly(1975,  1, 11), EmploymentType = "正社員", PositionCategory = "役職者" },
+            new() { EmployeeNo = "45", FullName = "村上 桂市",     HireDate = new DateOnly(2008, 10,  1), BirthDate = new DateOnly(1975,  9,  5), EmploymentType = "正社員", PositionCategory = "役職者" },
+            new() { EmployeeNo = "24", FullName = "山川 みのり",   HireDate = new DateOnly(2011,  6,  1), BirthDate = new DateOnly(1991,  9, 30), EmploymentType = "正社員", PositionCategory = "一般職" },
+            new() { EmployeeNo = "27", FullName = "浦崎 賢太",     HireDate = new DateOnly(2016, 10,  1), BirthDate = new DateOnly(1991, 12, 26), EmploymentType = "正社員", PositionCategory = "役職者" },
+            new() { EmployeeNo = "25", FullName = "仲間 早妃子",   HireDate = new DateOnly(2016, 11,  1), BirthDate = new DateOnly(1993,  2,  6), EmploymentType = "正社員", PositionCategory = "一般職" },
+            new() { EmployeeNo = "46", FullName = "糸数 智樹",     HireDate = new DateOnly(2017, 11,  1), BirthDate = new DateOnly(1986,  3, 27), EmploymentType = "正社員", PositionCategory = "一般職" },
+            new() { EmployeeNo = "47", FullName = "根間 大輝",     HireDate = new DateOnly(2018,  5, 21), BirthDate = new DateOnly(1990,  5,  4), EmploymentType = "正社員", PositionCategory = "一般職" },
+            new() { EmployeeNo = "28", FullName = "比嘉 奈津美",   HireDate = new DateOnly(2019,  2, 12), BirthDate = new DateOnly(1994,  1,  7), EmploymentType = "正社員", PositionCategory = "一般職" },
+            new() { EmployeeNo = "48", FullName = "銘苅 翔太",     HireDate = new DateOnly(2020,  8, 11), BirthDate = new DateOnly(1990,  1, 20), EmploymentType = "正社員", PositionCategory = "一般職" },
+            new() { EmployeeNo = "29", FullName = "小林 東夢",     HireDate = new DateOnly(2021,  2, 16), BirthDate = new DateOnly(1995,  5, 31), EmploymentType = "正社員", PositionCategory = "一般職" },
+            new() { EmployeeNo = "23", FullName = "幸喜 莉沙",     HireDate = new DateOnly(2021,  4, 12), BirthDate = new DateOnly(1997,  8,  6), EmploymentType = "正社員", PositionCategory = "一般職" },
+            new() { EmployeeNo = "26", FullName = "諸喜田 樹",     HireDate = new DateOnly(2021,  8,  2), BirthDate = new DateOnly(1996,  4,  2), EmploymentType = "正社員", PositionCategory = "一般職" },
+            new() { EmployeeNo = "22", FullName = "石川 翔一郎",   HireDate = new DateOnly(2024,  1, 15), BirthDate = new DateOnly(2002,  1,  6), EmploymentType = "正社員", PositionCategory = "一般職" },
+            new() { EmployeeNo = "32", FullName = "新城 美咲",     HireDate = new DateOnly(2024,  9,  2), BirthDate = new DateOnly(1996,  7, 12), EmploymentType = "正社員", PositionCategory = "一般職" },
+            new() { EmployeeNo = "33", FullName = "田中 美帆",     HireDate = new DateOnly(2025,  1,  6), BirthDate = new DateOnly(2000,  4,  2), EmploymentType = "正社員", PositionCategory = "一般職" },
+            new() { EmployeeNo = "34", FullName = "山本 暉",       HireDate = new DateOnly(2025,  3,  3), BirthDate = new DateOnly(1997,  4, 25), EmploymentType = "正社員", PositionCategory = "一般職" },
+            new() { EmployeeNo = "31", FullName = "玉城 千佳子",   HireDate = new DateOnly(2025,  6,  1), BirthDate = null,                       EmploymentType = "パート",  PositionCategory = "一般職" },
+            new() { EmployeeNo = "49", FullName = "岸本 幸太",     HireDate = new DateOnly(2025, 12,  1), BirthDate = new DateOnly(1994,  6,  7), EmploymentType = "正社員", PositionCategory = "一般職" },
+            new() { EmployeeNo = "35", FullName = "田原 賢斗",     HireDate = new DateOnly(2026,  4,  6), BirthDate = null,                       EmploymentType = "正社員", PositionCategory = "一般職" },
         };
         db.Employees.AddRange(employees);
         await db.SaveChangesAsync();
 
-        // ── 徴収セッション × CollectionRecord（過去3か月分 × 2種別）────────────
-        var months = new[]
-        {
-            (Year: 2026, Month: 1),
-            (Year: 2026, Month: 2),
-            (Year: 2026, Month: 3),
-        };
+        // ── 過去3か月（締め切り済）＋ 今月（進行中）────────────────────────────
+        var pastMonths = new[] { (Year: 2026, Month: 1), (Year: 2026, Month: 2), (Year: 2026, Month: 3) };
+        var savingsTypeIds = new[] { 1, 2 };
+        int balance1 = 0; // 通常積立残高
+        int balance2 = 0; // 還暦積立残高
 
-        var savingsTypeIds = new[] { 1, 2 }; // 1=通常積立, 2=還暦積立
-        int runningBalance1 = 0; // 通常積立残高
-        int runningBalance2 = 0; // 還暦積立残高
-
-        foreach (var (year, month) in months)
+        foreach (var (year, month) in pastMonths)
         {
+            // そのセッション月の月末時点で在籍している社員のみ対象
+            var monthEnd = new DateOnly(year, month, DateTime.DaysInMonth(year, month));
+            var sessionEmployees = employees.Where(e => e.HireDate <= monthEnd).ToList();
             var asOf = new DateOnly(year, month, 1);
 
             foreach (var stId in savingsTypeIds)
@@ -61,8 +72,7 @@ public static class DataSeeder
                 db.CollectionSessions.Add(session);
                 await db.SaveChangesAsync();
 
-                // 通常積立は全員、還暦積立は全員対象（除外なし）
-                var records = employees.Select(emp => new CollectionRecord
+                var records = sessionEmployees.Select(emp => new CollectionRecord
                 {
                     SessionId = session.SessionId,
                     EmployeeId = emp.EmployeeId,
@@ -72,8 +82,8 @@ public static class DataSeeder
                     CollectedAt = new DateTime(year, month, 20)
                 }).ToList();
 
-                // 通常積立のみ：1人を不参加として除外（テスト用）
-                if (stId == 1 && records.Count > 0)
+                // 通常積立のみ：懇親会不参加として1人除外（ダミー）
+                if (stId == 1 && records.Count > 1)
                 {
                     records[^1].IsCollected = false;
                     records[^1].IsExcluded = true;
@@ -83,73 +93,68 @@ public static class DataSeeder
                 db.CollectionRecords.AddRange(records);
                 await db.SaveChangesAsync();
 
-                // 徴収合計を収支帳簿に自動入金として追加
-                var savingsTypeName = stId == 1 ? "通常積立" : "還暦積立";
-                var totalAmount = records.Where(r => r.IsCollected && !r.IsExcluded).Sum(r => r.ExpectedAmount);
+                var stName = stId == 1 ? "通常積立" : "還暦積立";
+                var total = records.Where(r => r.IsCollected && !r.IsExcluded).Sum(r => r.ExpectedAmount);
 
-                ref var balance = ref (stId == 1 ? ref runningBalance1 : ref runningBalance2);
-                balance += totalAmount;
+                ref var bal = ref (stId == 1 ? ref balance1 : ref balance2);
+                bal += total;
 
-                var incomeEntry = new LedgerEntry
+                db.LedgerEntries.Add(new LedgerEntry
                 {
                     SavingsTypeId = stId,
                     TransactionDate = new DateOnly(year, month, 20),
                     EntryType = "入金",
-                    Description = $"{year}年{month}月分 {savingsTypeName} 徴収分",
-                    Amount = totalAmount,
-                    BalanceAfter = balance,
+                    Description = $"{year}年{month}月分 {stName} 徴収分",
+                    Amount = total,
+                    BalanceAfter = bal,
                     IsAutoGenerated = true,
                     SourceSessionId = session.SessionId,
                     CreatedAt = new DateTime(year, month, 20)
-                };
-                db.LedgerEntries.Add(incomeEntry);
+                });
                 await db.SaveChangesAsync();
             }
         }
 
-        // ── 手動支出（2月・3月に出金）────────────────────────────────────────
-        // 2月：通常積立から食事会費支出
-        runningBalance1 -= 15000;
+        // ── 手動支出（ダミー）────────────────────────────────────────────────
+        balance1 -= 20000;
         db.LedgerEntries.Add(new LedgerEntry
         {
             SavingsTypeId = 1,
             TransactionDate = new DateOnly(2026, 2, 20),
             EntryType = "出金",
             Description = "2月懇親会 食事代",
-            Amount = 15000,
-            BalanceAfter = runningBalance1,
+            Amount = 20000,
+            BalanceAfter = balance1,
             IsAutoGenerated = false,
             CreatedAt = new DateTime(2026, 2, 20)
         });
 
-        // 3月：通常積立から誕生日プレゼント
-        runningBalance1 -= 3000;
+        balance1 -= 3000;
         db.LedgerEntries.Add(new LedgerEntry
         {
             SavingsTypeId = 1,
-            TransactionDate = new DateOnly(2026, 3, 10),
+            TransactionDate = new DateOnly(2026, 3, 15),
             EntryType = "出金",
-            Description = "佐藤さん誕生日プレゼント",
+            Description = "比嘉さん誕生日プレゼント代",
             Amount = 3000,
-            BalanceAfter = runningBalance1,
+            BalanceAfter = balance1,
             IsAutoGenerated = false,
-            CreatedAt = new DateTime(2026, 3, 10)
+            CreatedAt = new DateTime(2026, 3, 15)
         });
-
         await db.SaveChangesAsync();
 
-        // ── 今月（4月）の進行中セッション──────────────────────────────────────
-        // 通常積立（未完了・徴収チェック用）
-        var apr = new DateOnly(2026, 4, 1);
-        var rulesNormal = await db.ContributionAmountRules
-            .Where(r => r.SavingsTypeId == 1 && r.ValidFrom <= apr && (r.ValidTo == null || r.ValidTo >= apr))
+        // ── 4月（進行中）────────────────────────────────────────────────────
+        var aprEnd = new DateOnly(2026, 4, 30);
+        var aprEmployees = employees.Where(e => e.HireDate <= aprEnd).ToList();
+        var aprAsOf = new DateOnly(2026, 4, 1);
+
+        var aprRulesNormal = await db.ContributionAmountRules
+            .Where(r => r.SavingsTypeId == 1 && r.ValidFrom <= aprAsOf && (r.ValidTo == null || r.ValidTo >= aprAsOf))
             .OrderBy(r => r.Priority).ToListAsync();
 
         var aprNormalSession = new CollectionSession
         {
-            SavingsTypeId = 1,
-            Year = 2026,
-            Month = 4,
+            SavingsTypeId = 1, Year = 2026, Month = 4,
             SessionDate = new DateOnly(2026, 4, 25),
             IsCompleted = false,
             CreatedAt = DateTime.Now
@@ -157,27 +162,24 @@ public static class DataSeeder
         db.CollectionSessions.Add(aprNormalSession);
         await db.SaveChangesAsync();
 
-        var aprNormalRecords = employees.Select((emp, i) => new CollectionRecord
+        var aprNormalRecords = aprEmployees.Select((emp, i) => new CollectionRecord
         {
             SessionId = aprNormalSession.SessionId,
             EmployeeId = emp.EmployeeId,
-            ExpectedAmount = calculator.Calculate(emp, rulesNormal, apr),
-            IsCollected = i < 3, // 最初の3人は徴収済み
+            ExpectedAmount = calculator.Calculate(emp, aprRulesNormal, aprAsOf),
+            IsCollected = i < 5,  // 先頭5人のみ徴収済み（ダミー）
             IsExcluded = false,
-            CollectedAt = i < 3 ? DateTime.Now : null
+            CollectedAt = i < 5 ? DateTime.Now : null
         }).ToList();
         db.CollectionRecords.AddRange(aprNormalRecords);
 
-        // 還暦積立（未完了）
-        var rulesKanreki = await db.ContributionAmountRules
-            .Where(r => r.SavingsTypeId == 2 && r.ValidFrom <= apr && (r.ValidTo == null || r.ValidTo >= apr))
+        var aprRulesKanreki = await db.ContributionAmountRules
+            .Where(r => r.SavingsTypeId == 2 && r.ValidFrom <= aprAsOf && (r.ValidTo == null || r.ValidTo >= aprAsOf))
             .OrderBy(r => r.Priority).ToListAsync();
 
         var aprKanrekiSession = new CollectionSession
         {
-            SavingsTypeId = 2,
-            Year = 2026,
-            Month = 4,
+            SavingsTypeId = 2, Year = 2026, Month = 4,
             SessionDate = new DateOnly(2026, 4, 25),
             IsCompleted = false,
             CreatedAt = DateTime.Now
@@ -185,14 +187,14 @@ public static class DataSeeder
         db.CollectionSessions.Add(aprKanrekiSession);
         await db.SaveChangesAsync();
 
-        var aprKanrekiRecords = employees.Select((emp, i) => new CollectionRecord
+        var aprKanrekiRecords = aprEmployees.Select((emp, i) => new CollectionRecord
         {
             SessionId = aprKanrekiSession.SessionId,
             EmployeeId = emp.EmployeeId,
-            ExpectedAmount = calculator.Calculate(emp, rulesKanreki, apr),
-            IsCollected = i < 2, // 最初の2人のみ徴収済み
+            ExpectedAmount = calculator.Calculate(emp, aprRulesKanreki, aprAsOf),
+            IsCollected = i < 3,  // 先頭3人のみ徴収済み（ダミー）
             IsExcluded = false,
-            CollectedAt = i < 2 ? DateTime.Now : null
+            CollectedAt = i < 3 ? DateTime.Now : null
         }).ToList();
         db.CollectionRecords.AddRange(aprKanrekiRecords);
 

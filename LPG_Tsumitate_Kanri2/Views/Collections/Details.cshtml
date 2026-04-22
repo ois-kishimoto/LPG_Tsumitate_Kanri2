@@ -4,7 +4,7 @@
     var session = Model.Session;
 }
 
-<div class="d-flex justify-content-between align-items-start mb-3">
+<div class="d-flex flex-wrap gap-2 justify-content-between align-items-start mb-3">
     <div>
         <h2 class="mb-1">徴収チェック</h2>
         <p class="text-muted mb-0">@session.Year 年 @session.Month 月分　@session.SavingsType.Name</p>
@@ -12,26 +12,26 @@
     <a asp-action="Index" class="btn btn-outline-secondary btn-sm">← 一覧に戻る</a>
 </div>
 
-<div class="row g-3 mb-4">
-    <div class="col-auto">
+<div class="row g-2 mb-4">
+    <div class="col-6 col-sm-auto">
         <div class="card border-0 bg-light px-3 py-2 text-center">
             <small class="text-muted">徴収済合計</small>
             <strong id="totalAmount">@Model.TotalCollected.ToString("N0") 円</strong>
         </div>
     </div>
-    <div class="col-auto">
+    <div class="col-6 col-sm-auto">
         <div class="card border-0 bg-light px-3 py-2 text-center">
             <small class="text-muted">徴収済</small>
             <strong id="collectedCount" class="text-success">@Model.CollectedCount 人</strong>
         </div>
     </div>
-    <div class="col-auto">
+    <div class="col-6 col-sm-auto">
         <div class="card border-0 bg-light px-3 py-2 text-center">
             <small class="text-muted">未徴収</small>
             <strong id="pendingCount" class="text-danger">@Model.PendingCount 人</strong>
         </div>
     </div>
-    <div class="col-auto">
+    <div class="col-6 col-sm-auto">
         <div class="card border-0 bg-light px-3 py-2 text-center">
             <small class="text-muted">除外</small>
             <strong class="text-muted">@Model.ExcludedCount 人</strong>
@@ -41,7 +41,14 @@
 
 @if (session.IsCompleted)
 {
-    <div class="alert alert-success">このセッションは締め切り済みです。収支帳簿に入金が反映されています。</div>
+    <div class="alert alert-success d-flex flex-wrap gap-2 align-items-center justify-content-between">
+        <span>このセッションは締め切り済みです。収支帳簿に入金が反映されています。</span>
+        <form asp-action="Reopen" asp-route-id="@session.SessionId" method="post"
+              onsubmit="return confirm('締め切りを解除しますか？\n収支帳簿の自動入金レコードが削除され、再度チェックを変更できるようになります。')">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-sm btn-outline-warning">締め切りを解除する</button>
+        </form>
+    </div>
 }
 
 <div class="table-responsive mb-4">
