@@ -1,0 +1,51 @@
+@model IEnumerable<LPG_Tsumitate_Kanri2.Models.Entities.Employee>
+@{
+    ViewData["Title"] = "社員管理";
+}
+
+<div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+    <h2>社員管理</h2>
+    <a asp-action="Create" class="btn btn-primary">＋ 社員登録</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>社員番号</th>
+                <th>氏名</th>
+                <th>入社日</th>
+                <th>勤続年数</th>
+                <th>雇用形態</th>
+                <th>役職区分</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var emp in Model)
+            {
+                var today = DateOnly.FromDateTime(DateTime.Today);
+                <tr>
+                    <td>@emp.EmployeeNo</td>
+                    <td>@emp.FullName</td>
+                    <td>@emp.HireDate.ToString("yyyy/MM/dd")</td>
+                    <td>@emp.GetYearsOfService(today) 年</td>
+                    <td>@emp.EmploymentType</td>
+                    <td>@emp.PositionCategory</td>
+                    <td class="text-end">
+                        <a asp-action="Edit" asp-route-id="@emp.EmployeeId" class="btn btn-sm btn-outline-secondary">編集</a>
+                        <form asp-action="Deactivate" asp-route-id="@emp.EmployeeId" method="post" class="d-inline"
+                              onsubmit="return confirm('@emp.FullName を退職処理しますか？')">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger">退職</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+@if (!Model.Any())
+{
+    <p class="text-muted text-center py-4">社員が登録されていません。</p>
+}
