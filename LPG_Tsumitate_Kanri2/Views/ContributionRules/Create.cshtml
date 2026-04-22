@@ -1,0 +1,85 @@
+@model LPG_Tsumitate_Kanri2.Models.Entities.ContributionAmountRule
+@{
+    ViewData["Title"] = "ルール追加";
+    var savingsTypes = (List<LPG_Tsumitate_Kanri2.Models.Entities.SavingsType>)ViewBag.SavingsTypes;
+}
+
+<h2 class="mb-4">積立金額ルール追加</h2>
+<p class="text-muted mb-4">条件を空にした場合は「全員」に適用されます。Priority が小さいほど先に評価されます。</p>
+
+<div class="row">
+    <div class="col-md-5">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <div class="mb-3">
+                <label asp-for="SavingsTypeId" class="form-label"></label>
+                <select asp-for="SavingsTypeId" class="form-select">
+                    <option value="">選択してください</option>
+                    @foreach (var st in savingsTypes)
+                    {
+                        <option value="@st.SavingsTypeId">@st.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="SavingsTypeId" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Priority" class="form-label"></label>
+                <input asp-for="Priority" type="number" class="form-control" min="1" />
+                <span asp-validation-for="Priority" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ConditionEmploymentType" class="form-label"></label>
+                <select asp-for="ConditionEmploymentType" class="form-select">
+                    <option value="">（条件なし）</option>
+                    <option value="正社員">正社員</option>
+                    <option value="パート">パート</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ConditionMaxYearsOfService" class="form-label"></label>
+                <div class="input-group">
+                    <input asp-for="ConditionMaxYearsOfService" type="number" class="form-control" min="1" placeholder="空白 = 条件なし" />
+                    <span class="input-group-text">年未満</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ConditionPositionCategory" class="form-label"></label>
+                <select asp-for="ConditionPositionCategory" class="form-select">
+                    <option value="">（条件なし）</option>
+                    <option value="一般職">一般職</option>
+                    <option value="役職者">役職者</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Amount" class="form-label"></label>
+                <div class="input-group">
+                    <input asp-for="Amount" type="number" class="form-control" min="0" />
+                    <span class="input-group-text">円</span>
+                </div>
+                <span asp-validation-for="Amount" class="text-danger small"></span>
+            </div>
+            <div class="row">
+                <div class="col mb-3">
+                    <label asp-for="ValidFrom" class="form-label"></label>
+                    <input asp-for="ValidFrom" type="date" class="form-control" />
+                    <span asp-validation-for="ValidFrom" class="text-danger small"></span>
+                </div>
+                <div class="col mb-3">
+                    <label asp-for="ValidTo" class="form-label"></label>
+                    <input asp-for="ValidTo" type="date" class="form-control" />
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">追加</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">キャンセル</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

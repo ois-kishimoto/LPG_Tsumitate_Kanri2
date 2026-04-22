@@ -1,0 +1,59 @@
+@model LPG_Tsumitate_Kanri2.Models.Entities.CollectionSession
+@{
+    ViewData["Title"] = "徴収セッション作成";
+    var savingsTypes = (List<LPG_Tsumitate_Kanri2.Models.Entities.SavingsType>)ViewBag.SavingsTypes;
+}
+
+<h2 class="mb-4">徴収セッション作成</h2>
+<p class="text-muted mb-4">作成すると、在籍中の全社員分の徴収記録が自動生成されます。</p>
+
+<div class="row">
+    <div class="col-md-5">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <div class="mb-3">
+                <label asp-for="SavingsTypeId" class="form-label"></label>
+                <select asp-for="SavingsTypeId" class="form-select">
+                    <option value="">選択してください</option>
+                    @foreach (var st in savingsTypes)
+                    {
+                        <option value="@st.SavingsTypeId">@st.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="SavingsTypeId" class="text-danger small"></span>
+            </div>
+            <div class="row">
+                <div class="col mb-3">
+                    <label asp-for="Year" class="form-label"></label>
+                    <input asp-for="Year" type="number" class="form-control" min="2020" max="2099" />
+                    <span asp-validation-for="Year" class="text-danger small"></span>
+                </div>
+                <div class="col mb-3">
+                    <label asp-for="Month" class="form-label"></label>
+                    <input asp-for="Month" type="number" class="form-control" min="1" max="12" />
+                    <span asp-validation-for="Month" class="text-danger small"></span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="SessionDate" class="form-label"></label>
+                <input asp-for="SessionDate" type="date" class="form-control" />
+                <span asp-validation-for="SessionDate" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Notes" class="form-label"></label>
+                <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">作成</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">キャンセル</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

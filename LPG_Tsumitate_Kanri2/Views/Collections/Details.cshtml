@@ -1,0 +1,169 @@
+@model LPG_Tsumitate_Kanri2.Models.ViewModels.CollectionCheckViewModel
+@{
+    ViewData["Title"] = "徴収チェック";
+    var session = Model.Session;
+}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h2 class="mb-1">徴収チェック</h2>
+        <p class="text-muted mb-0">@session.Year 年 @session.Month 月分　@session.SavingsType.Name</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">← 一覧に戻る</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-auto">
+        <div class="card border-0 bg-light px-3 py-2 text-center">
+            <small class="text-muted">徴収済合計</small>
+            <strong id="totalAmount">@Model.TotalCollected.ToString("N0") 円</strong>
+        </div>
+    </div>
+    <div class="col-auto">
+        <div class="card border-0 bg-light px-3 py-2 text-center">
+            <small class="text-muted">徴収済</small>
+            <strong id="collectedCount" class="text-success">@Model.CollectedCount 人</strong>
+        </div>
+    </div>
+    <div class="col-auto">
+        <div class="card border-0 bg-light px-3 py-2 text-center">
+            <small class="text-muted">未徴収</small>
+            <strong id="pendingCount" class="text-danger">@Model.PendingCount 人</strong>
+        </div>
+    </div>
+    <div class="col-auto">
+        <div class="card border-0 bg-light px-3 py-2 text-center">
+            <small class="text-muted">除外</small>
+            <strong class="text-muted">@Model.ExcludedCount 人</strong>
+        </div>
+    </div>
+</div>
+
+@if (session.IsCompleted)
+{
+    <div class="alert alert-success">このセッションは締め切り済みです。収支帳簿に入金が反映されています。</div>
+}
+
+<div class="table-responsive mb-4">
+    <table class="table table-hover align-middle" id="checkTable">
+        <thead class="table-light">
+            <tr>
+                <th>社員番号</th>
+                <th>氏名</th>
+                <th class="text-end">徴収金額</th>
+                <th class="text-center">徴収済み</th>
+                @if (Model.IsNormalSavings && !session.IsCompleted)
+                {
+                    <th class="text-center">除外（不参加）</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model.Records)
+            {
+                <tr class="@(r.IsExcluded ? "table-secondary text-muted" : "")" id="row-@r.RecordId">
+                    <td>@r.EmployeeNo</td>
+                    <td>@r.FullName</td>
+                    <td class="text-end">@r.ExpectedAmount.ToString("N0") 円</td>
+                    <td class="text-center">
+                        @if (session.IsCompleted)
+                        {
+                            <span class="badge bg-@(r.IsCollected ? "success" : "secondary")">
+                                @(r.IsCollected ? "済" : "未")
+                            </span>
+                        }
+                        else
+                        {
+                            <input type="checkbox"
+                                   class="form-check-input check-toggle"
+                                   data-record-id="@r.RecordId"
+                                   data-amount="@r.ExpectedAmount"
+                                   @(r.IsCollected ? "checked" : "")
+                                   @(r.IsExcluded ? "disabled" : "") />
+                        }
+                    </td>
+                    @if (Model.IsNormalSavings && !session.IsCompleted)
+                    {
+                        <td class="text-center">
+                            <input type="checkbox"
+                                   class="form-check-input exclude-toggle"
+                                   data-record-id="@r.RecordId"
+                                   @(r.IsExcluded ? "checked" : "") />
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (!session.IsCompleted)
+{
+    <form asp-action="Complete" asp-route-id="@session.SessionId" method="post"
+          onsubmit="return confirm('締め切りますか？締め切り後は変更できません。徴収済みの合算金額が収支帳簿に自動入金されます。')">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-success">徴収を締め切る（収支帳簿に自動反映）</button>
+    </form>
+}
+
+@section Scripts {
+<script>
+    const sessionId = @session.SessionId;
+
+    document.querySelectorAll('.check-toggle').forEach(cb => {
+        cb.addEventListener('change', async function () {
+            const recordId = this.dataset.recordId;
+            const amount = parseInt(this.dataset.amount);
+            const res = await postAction('@Url.Action("Toggle", "Collections")', { id: sessionId, recordId });
+            if (!res.success) {
+                this.checked = !this.checked;
+                alert(res.message);
+            }
+            updateSummary();
+        });
+    });
+
+    document.querySelectorAll('.exclude-toggle').forEach(cb => {
+        cb.addEventListener('change', async function () {
+            const recordId = this.dataset.recordId;
+            const res = await postAction('@Url.Action("Exclude", "Collections")', { id: sessionId, recordId });
+            if (!res.success) {
+                this.checked = !this.checked;
+                alert(res.message);
+                return;
+            }
+            const row = document.getElementById('row-' + recordId);
+            const checkCb = row.querySelector('.check-toggle');
+            if (res.isExcluded) {
+                row.classList.add('table-secondary', 'text-muted');
+                if (checkCb) { checkCb.checked = false; checkCb.disabled = true; }
+            } else {
+                row.classList.remove('table-secondary', 'text-muted');
+                if (checkCb) checkCb.disabled = false;
+            }
+            updateSummary();
+        });
+    });
+
+    async function postAction(url, data) {
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+        const body = new URLSearchParams({ ...data, __RequestVerificationToken: token });
+        const r = await fetch(url, { method: 'POST', body, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+        return r.json();
+    }
+
+    function updateSummary() {
+        let total = 0, collected = 0, pending = 0;
+        document.querySelectorAll('.check-toggle').forEach(cb => {
+            if (!cb.disabled) {
+                if (cb.checked) { total += parseInt(cb.dataset.amount); collected++; }
+                else pending++;
+            }
+        });
+        document.getElementById('totalAmount').textContent = total.toLocaleString() + ' 円';
+        document.getElementById('collectedCount').textContent = collected + ' 人';
+        document.getElementById('pendingCount').textContent = pending + ' 人';
+    }
+</script>
+<form id="antiforgery-form">@Html.AntiForgeryToken()</form>
+}

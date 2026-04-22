@@ -1,8 +1,82 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model LPG_Tsumitate_Kanri2.Models.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "ダッシュボード";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<h2 class="mb-4">ダッシュボード</h2>
+
+<div class="row mb-4">
+    @foreach (var b in Model.Balances)
+    {
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-subtitle text-muted mb-2">@b.Name 残高</h6>
+                    <p class="card-text fs-3 fw-bold text-@(b.CurrentBalance >= 0 ? "primary" : "danger")">
+                        @b.CurrentBalance.ToString("N0") 円
+                    </p>
+                    <a asp-controller="Ledger" asp-action="Index" asp-route-savingsTypeId="@b.SavingsTypeId"
+                       class="btn btn-sm btn-outline-secondary">収支を見る</a>
+                </div>
+            </div>
+        </div>
+    }
 </div>
+
+@if (Model.PendingAlerts.Any())
+{
+    <div class="alert alert-warning" role="alert">
+        <h6 class="alert-heading">未徴収があります</h6>
+        <ul class="mb-0">
+            @foreach (var alert in Model.PendingAlerts)
+            {
+                <li>
+                    <a asp-controller="Collections" asp-action="Details" asp-route-id="@alert.SessionId">
+                        @alert.Year 年 @alert.Month 月分 @alert.SavingsTypeName
+                    </a>
+                    ― 未徴収 @alert.PendingCount 人
+                </li>
+            }
+        </ul>
+    </div>
+}
+
+<h5 class="mb-3">直近の収支</h5>
+@if (!Model.RecentEntries.Any())
+{
+    <p class="text-muted">収支記録がまだありません。</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-sm table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>日付</th>
+                    <th>種別</th>
+                    <th>区分</th>
+                    <th>内容</th>
+                    <th class="text-end">金額</th>
+                    <th class="text-end">残高</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var e in Model.RecentEntries)
+                {
+                    <tr>
+                        <td>@e.TransactionDate.ToString("yyyy/MM/dd")</td>
+                        <td>@e.SavingsType.Name</td>
+                        <td>
+                            <span class="badge bg-@(e.EntryType == "入金" ? "success" : "danger")">@e.EntryType</span>
+                        </td>
+                        <td>
+                            <a asp-controller="Ledger" asp-action="Details" asp-route-id="@e.EntryId">@e.Description</a>
+                        </td>
+                        <td class="text-end">@e.Amount.ToString("N0") 円</td>
+                        <td class="text-end">@e.BalanceAfter.ToString("N0") 円</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

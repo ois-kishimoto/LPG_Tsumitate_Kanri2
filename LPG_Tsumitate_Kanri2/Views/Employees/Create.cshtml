@@ -1,0 +1,63 @@
+@model LPG_Tsumitate_Kanri2.Models.Entities.Employee
+@{
+    ViewData["Title"] = "社員登録";
+}
+
+<h2 class="mb-4">社員登録</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <div class="mb-3">
+                <label asp-for="EmployeeNo" class="form-label"></label>
+                <input asp-for="EmployeeNo" class="form-control" />
+                <span asp-validation-for="EmployeeNo" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label"></label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="HireDate" class="form-label"></label>
+                <input asp-for="HireDate" type="date" class="form-control" />
+                <span asp-validation-for="HireDate" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="BirthDate" class="form-label"></label>
+                <input asp-for="BirthDate" type="date" class="form-control" />
+                <span asp-validation-for="BirthDate" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="EmploymentType" class="form-label"></label>
+                <select asp-for="EmploymentType" class="form-select">
+                    <option value="">選択してください</option>
+                    <option value="正社員">正社員</option>
+                    <option value="パート">パート</option>
+                </select>
+                <span asp-validation-for="EmploymentType" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="PositionCategory" class="form-label"></label>
+                <select asp-for="PositionCategory" class="form-select">
+                    <option value="">選択してください</option>
+                    <option value="一般職">一般職</option>
+                    <option value="役職者">役職者</option>
+                </select>
+                <span asp-validation-for="PositionCategory" class="text-danger small"></span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">登録</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">キャンセル</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
