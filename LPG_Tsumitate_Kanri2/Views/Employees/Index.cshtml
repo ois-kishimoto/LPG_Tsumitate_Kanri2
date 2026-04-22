@@ -119,7 +119,7 @@
             @{var today = DateOnly.FromDateTime(DateTime.Today);}
             @foreach (var emp in Model)
             {
-                <tr>
+                <tr class="@(!emp.IsActive ? "table-secondary text-muted" : (emp.IsOnLeave ? "table-warning text-muted" : ""))">
                     <td>@emp.EmployeeNo</td>
                     <td>@emp.FullName</td>
                     <td class="text-nowrap">@emp.HireDate.ToString("yyyy/MM/dd")</td>
@@ -128,11 +128,41 @@
                     <td>@emp.PositionCategory</td>
                     <td class="text-end text-nowrap">
                         <a asp-action="Edit" asp-route-id="@emp.EmployeeId" class="btn btn-sm btn-outline-secondary">編集</a>
-                        <form asp-action="Deactivate" asp-route-id="@emp.EmployeeId" method="post" class="d-inline"
-                              onsubmit="return confirm('@emp.FullName を退職処理しますか？')">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-sm btn-outline-danger">退職</button>
-                        </form>
+                        @if (!emp.IsActive)
+                        {
+                            <span class="badge bg-secondary me-1">退職済</span>
+                            <form asp-action="Reactivate" asp-route-id="@emp.EmployeeId" method="post" class="d-inline"
+                                  onsubmit="return confirm('@emp.FullName の退職を解除しますか？')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">退職解除</button>
+                            </form>
+                        }
+                        else if (emp.IsOnLeave)
+                        {
+                            <form asp-action="CancelLeave" asp-route-id="@emp.EmployeeId" method="post" class="d-inline"
+                                  onsubmit="return confirm('@emp.FullName の休職を解除しますか？')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-warning">休職解除</button>
+                            </form>
+                            <form asp-action="Deactivate" asp-route-id="@emp.EmployeeId" method="post" class="d-inline"
+                                  onsubmit="return confirm('@emp.FullName を退職処理しますか？')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger">退職</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="SetLeave" asp-route-id="@emp.EmployeeId" method="post" class="d-inline"
+                                  onsubmit="return confirm('@emp.FullName を産休・育休・休職扱いにしますか？')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-warning">産休/育休/休職</button>
+                            </form>
+                            <form asp-action="Deactivate" asp-route-id="@emp.EmployeeId" method="post" class="d-inline"
+                                  onsubmit="return confirm('@emp.FullName を退職処理しますか？')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger">退職</button>
+                            </form>
+                        }
                     </td>
                 </tr>
             }

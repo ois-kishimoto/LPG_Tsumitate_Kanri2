@@ -11,6 +11,7 @@
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="EmployeeId" />
             <input type="hidden" asp-for="IsActive" />
+            <input type="hidden" asp-for="IsOnLeave" />
             <input type="hidden" asp-for="CreatedAt" />
             @if (!ViewData.ModelState.IsValid)
             {
