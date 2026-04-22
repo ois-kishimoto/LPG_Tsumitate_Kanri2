@@ -18,7 +18,7 @@ public class EmployeesController : Controller
         string? sortBy,
         string? sortDir)
     {
-        var query = _db.Employees.Where(e => e.IsActive).AsQueryable();
+        var query = _db.Employees.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
             query = query.Where(e => e.FullName.Contains(search) || e.EmployeeNo.Contains(search));
@@ -109,6 +109,43 @@ public class EmployeesController : Controller
         if (employee == null) return NotFound();
 
         employee.IsActive = false;
+        employee.IsOnLeave = false;
+        employee.UpdatedAt = DateTime.Now;
+        await _db.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Reactivate(int id)
+    {
+        var employee = await _db.Employees.FindAsync(id);
+        if (employee == null) return NotFound();
+
+        employee.IsActive = true;
+        employee.UpdatedAt = DateTime.Now;
+        await _db.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> SetLeave(int id)
+    {
+        var employee = await _db.Employees.FindAsync(id);
+        if (employee == null || !employee.IsActive) return NotFound();
+
+        employee.IsOnLeave = true;
+        employee.UpdatedAt = DateTime.Now;
+        await _db.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> CancelLeave(int id)
+    {
+        var employee = await _db.Employees.FindAsync(id);
+        if (employee == null) return NotFound();
+
+        employee.IsOnLeave = false;
         employee.UpdatedAt = DateTime.Now;
         await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));

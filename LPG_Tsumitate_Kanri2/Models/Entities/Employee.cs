@@ -32,6 +32,7 @@ public class Employee
     public string PositionCategory { get; set; } = string.Empty;
 
     public bool IsActive { get; set; } = true;
+    public bool IsOnLeave { get; set; } = false;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 

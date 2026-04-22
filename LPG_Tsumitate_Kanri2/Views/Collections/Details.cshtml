@@ -34,7 +34,7 @@
     <div class="col-6 col-sm-auto">
         <div class="card border-0 bg-light px-3 py-2 text-center">
             <small class="text-muted">除外</small>
-            <strong class="text-muted">@Model.ExcludedCount 人</strong>
+            <strong id="excludedCount" class="text-muted">@Model.ExcludedCount 人</strong>
         </div>
     </div>
 </div>
@@ -118,13 +118,23 @@
     const sessionId = @session.SessionId;
 
     document.querySelectorAll('.check-toggle').forEach(cb => {
+        if (cb.checked) setNameStrike(cb, true);
+    });
+
+    document.querySelectorAll('.check-toggle').forEach(cb => {
         cb.addEventListener('change', async function () {
+            const isUnchecking = !this.checked;
+            if (isUnchecking && !confirm('徴収済みのチェックを外しますか？')) {
+                this.checked = true;
+                return;
+            }
             const recordId = this.dataset.recordId;
-            const amount = parseInt(this.dataset.amount);
             const res = await postAction('@Url.Action("Toggle", "Collections")', { id: sessionId, recordId });
             if (!res.success) {
                 this.checked = !this.checked;
                 alert(res.message);
+            } else {
+                setNameStrike(this, this.checked);
             }
             updateSummary();
         });
@@ -133,17 +143,23 @@
     document.querySelectorAll('.exclude-toggle').forEach(cb => {
         cb.addEventListener('change', async function () {
             const recordId = this.dataset.recordId;
+            const row = document.getElementById('row-' + recordId);
+            const checkCb = row.querySelector('.check-toggle');
+            if (this.checked && checkCb && checkCb.checked) {
+                if (!confirm('この社員は徴収済みです。除外すると徴収済みのチェックも外れます。よろしいですか？')) {
+                    this.checked = false;
+                    return;
+                }
+            }
             const res = await postAction('@Url.Action("Exclude", "Collections")', { id: sessionId, recordId });
             if (!res.success) {
                 this.checked = !this.checked;
                 alert(res.message);
                 return;
             }
-            const row = document.getElementById('row-' + recordId);
-            const checkCb = row.querySelector('.check-toggle');
             if (res.isExcluded) {
                 row.classList.add('table-secondary', 'text-muted');
-                if (checkCb) { checkCb.checked = false; checkCb.disabled = true; }
+                if (checkCb) { checkCb.checked = false; checkCb.disabled = true; setNameStrike(checkCb, false); }
             } else {
                 row.classList.remove('table-secondary', 'text-muted');
                 if (checkCb) checkCb.disabled = false;
@@ -151,6 +167,13 @@
             updateSummary();
         });
     });
+
+    function setNameStrike(cb, strike) {
+        const row = cb.closest('tr');
+        if (!row) return;
+        const nameCell = row.cells[1];
+        if (nameCell) nameCell.style.textDecoration = strike ? 'line-through' : '';
+    }
 
     async function postAction(url, data) {
         const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
@@ -160,16 +183,17 @@
     }
 
     function updateSummary() {
-        let total = 0, collected = 0, pending = 0;
+        let total = 0, collected = 0, pending = 0, excluded = 0;
         document.querySelectorAll('.check-toggle').forEach(cb => {
-            if (!cb.disabled) {
-                if (cb.checked) { total += parseInt(cb.dataset.amount); collected++; }
-                else pending++;
-            }
+            if (cb.disabled) { excluded++; return; }
+            if (cb.checked) { total += parseInt(cb.dataset.amount); collected++; }
+            else pending++;
         });
         document.getElementById('totalAmount').textContent = total.toLocaleString() + ' 円';
         document.getElementById('collectedCount').textContent = collected + ' 人';
         document.getElementById('pendingCount').textContent = pending + ' 人';
+        const excEl = document.getElementById('excludedCount');
+        if (excEl) excEl.textContent = excluded + ' 人';
     }
 </script>
 <form id="antiforgery-form">@Html.AntiForgeryToken()</form>

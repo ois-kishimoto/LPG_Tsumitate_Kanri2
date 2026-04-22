@@ -70,7 +70,7 @@ public class CollectionsController : Controller
         await _db.SaveChangesAsync();
 
         var asOf = new DateOnly(model.Year, model.Month, 1);
-        var employees = await _db.Employees.Where(e => e.IsActive).ToListAsync();
+        var employees = await _db.Employees.Where(e => e.IsActive && !e.IsOnLeave).ToListAsync();
         var rules = await _db.ContributionAmountRules
             .Where(r => r.SavingsTypeId == model.SavingsTypeId
                 && r.ValidFrom <= asOf
