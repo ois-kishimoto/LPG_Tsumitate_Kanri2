@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace LPG_Tsumitate_Kanri2.Models.Entities;
 
@@ -23,6 +24,6 @@ public class CollectionRecord
     [Display(Name = "備考")]
     public string? Notes { get; set; }
 
-    public CollectionSession Session { get; set; } = null!;
-    public Employee Employee { get; set; } = null!;
+    [ValidateNever] public CollectionSession Session { get; set; } = null!;
+    [ValidateNever] public Employee Employee { get; set; } = null!;
 }

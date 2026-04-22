@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace LPG_Tsumitate_Kanri2.Models.Entities;
 
@@ -42,7 +43,7 @@ public class LedgerEntry
 
     public DateTime CreatedAt { get; set; }
 
-    public SavingsType SavingsType { get; set; } = null!;
-    public CollectionSession? SourceSession { get; set; }
-    public ICollection<Receipt> Receipts { get; set; } = new List<Receipt>();
+    [ValidateNever] public SavingsType SavingsType { get; set; } = null!;
+    [ValidateNever] public CollectionSession? SourceSession { get; set; }
+    [ValidateNever] public ICollection<Receipt> Receipts { get; set; } = new List<Receipt>();
 }

@@ -43,4 +43,17 @@ public class Employee
         if (asOf < HireDate.AddYears(years)) years--;
         return Math.Max(0, years);
     }
+
+    public string GetServicePeriodText(DateOnly asOf)
+    {
+        var years = asOf.Year - HireDate.Year;
+        if (asOf < HireDate.AddYears(years)) years--;
+        years = Math.Max(0, years);
+
+        var months = asOf.Month - HireDate.AddYears(years).Month;
+        if (asOf.Day < HireDate.Day) months--;
+        if (months < 0) months += 12;
+
+        return $"{years}年{months}ヶ月";
+    }
 }

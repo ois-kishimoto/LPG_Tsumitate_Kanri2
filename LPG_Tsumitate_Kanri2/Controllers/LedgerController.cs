@@ -27,8 +27,8 @@ public class LedgerController : Controller
         if (month.HasValue) query = query.Where(e => e.TransactionDate.Month == month.Value);
 
         var entries = await query
-            .OrderBy(e => e.TransactionDate)
-            .ThenBy(e => e.EntryId)
+            .OrderByDescending(e => e.TransactionDate)
+            .ThenByDescending(e => e.EntryId)
             .ToListAsync();
 
         ViewBag.SavingsTypes = await _db.SavingsTypes.OrderBy(s => s.DisplayOrder).ToListAsync();

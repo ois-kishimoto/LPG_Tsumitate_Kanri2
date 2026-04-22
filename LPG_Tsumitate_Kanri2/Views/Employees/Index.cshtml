@@ -1,6 +1,29 @@
 @model IEnumerable<LPG_Tsumitate_Kanri2.Models.Entities.Employee>
 @{
     ViewData["Title"] = "社員管理";
+    string curBy   = (ViewBag.SortBy  as string) ?? "no";
+    string curDir  = (ViewBag.SortDir as string) ?? "asc";
+    string? search  = ViewBag.Search as string;
+    string? empType = ViewBag.EmploymentType as string;
+    string? posCat  = ViewBag.PositionCategory as string;
+
+    string dirNo = "asc";
+    if (curBy == "no" && curDir == "asc") { dirNo = "desc"; }
+
+    string dirName = "asc";
+    if (curBy == "name" && curDir == "asc") { dirName = "desc"; }
+
+    string dirHiredate = "asc";
+    if (curBy == "hiredate" && curDir == "asc") { dirHiredate = "desc"; }
+
+    string dirService = "asc";
+    if (curBy == "service" && curDir == "asc") { dirService = "desc"; }
+
+    string dirEmptype = "asc";
+    if (curBy == "emptype" && curDir == "asc") { dirEmptype = "desc"; }
+
+    string dirPosition = "asc";
+    if (curBy == "position" && curDir == "asc") { dirPosition = "desc"; }
 }
 
 <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
@@ -8,31 +31,102 @@
     <a asp-action="Create" class="btn btn-primary">＋ 社員登録</a>
 </div>
 
+<form method="get" class="row g-2 mb-3">
+    <div class="col-12 col-sm-auto">
+        <input type="text" name="search" value="@search" placeholder="氏名・社員番号"
+               class="form-control form-control-sm" />
+    </div>
+    <div class="col-6 col-sm-auto">
+        <select name="employmentType" class="form-select form-select-sm">
+            <option value="">全雇用形態</option>
+            <option value="正社員" selected="@(empType == "正社員")">正社員</option>
+            <option value="パート" selected="@(empType == "パート")">パート</option>
+        </select>
+    </div>
+    <div class="col-6 col-sm-auto">
+        <select name="positionCategory" class="form-select form-select-sm">
+            <option value="">全役職区分</option>
+            <option value="役職者" selected="@(posCat == "役職者")">役職者</option>
+            <option value="一般職" selected="@(posCat == "一般職")">一般職</option>
+        </select>
+    </div>
+    <input type="hidden" name="sortBy" value="@curBy" />
+    <input type="hidden" name="sortDir" value="@curDir" />
+    <div class="col-6 col-sm-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary w-100">絞り込み</button>
+    </div>
+    <div class="col-6 col-sm-auto">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary w-100">クリア</a>
+    </div>
+</form>
+
 <div class="table-responsive">
     <table class="table table-hover">
         <thead class="table-light">
             <tr>
-                <th>社員番号</th>
-                <th>氏名</th>
-                <th>入社日</th>
-                <th>勤続年数</th>
-                <th>雇用形態</th>
-                <th>役職区分</th>
+                <th>
+                    <a asp-action="Index"
+                       asp-route-search="@search" asp-route-employmentType="@empType" asp-route-positionCategory="@posCat"
+                       asp-route-sortBy="no" asp-route-sortDir="@dirNo"
+                       class="text-decoration-none text-dark">
+                        社員番号@(curBy == "no" ? (curDir == "asc" ? " ▲" : " ▼") : "")
+                    </a>
+                </th>
+                <th>
+                    <a asp-action="Index"
+                       asp-route-search="@search" asp-route-employmentType="@empType" asp-route-positionCategory="@posCat"
+                       asp-route-sortBy="name" asp-route-sortDir="@dirName"
+                       class="text-decoration-none text-dark">
+                        氏名@(curBy == "name" ? (curDir == "asc" ? " ▲" : " ▼") : "")
+                    </a>
+                </th>
+                <th>
+                    <a asp-action="Index"
+                       asp-route-search="@search" asp-route-employmentType="@empType" asp-route-positionCategory="@posCat"
+                       asp-route-sortBy="hiredate" asp-route-sortDir="@dirHiredate"
+                       class="text-decoration-none text-dark">
+                        入社日@(curBy == "hiredate" ? (curDir == "asc" ? " ▲" : " ▼") : "")
+                    </a>
+                </th>
+                <th>
+                    <a asp-action="Index"
+                       asp-route-search="@search" asp-route-employmentType="@empType" asp-route-positionCategory="@posCat"
+                       asp-route-sortBy="service" asp-route-sortDir="@dirService"
+                       class="text-decoration-none text-dark">
+                        勤続年数@(curBy == "service" ? (curDir == "asc" ? " ▲" : " ▼") : "")
+                    </a>
+                </th>
+                <th>
+                    <a asp-action="Index"
+                       asp-route-search="@search" asp-route-employmentType="@empType" asp-route-positionCategory="@posCat"
+                       asp-route-sortBy="emptype" asp-route-sortDir="@dirEmptype"
+                       class="text-decoration-none text-dark">
+                        雇用形態@(curBy == "emptype" ? (curDir == "asc" ? " ▲" : " ▼") : "")
+                    </a>
+                </th>
+                <th>
+                    <a asp-action="Index"
+                       asp-route-search="@search" asp-route-employmentType="@empType" asp-route-positionCategory="@posCat"
+                       asp-route-sortBy="position" asp-route-sortDir="@dirPosition"
+                       class="text-decoration-none text-dark">
+                        役職区分@(curBy == "position" ? (curDir == "asc" ? " ▲" : " ▼") : "")
+                    </a>
+                </th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
+            @{var today = DateOnly.FromDateTime(DateTime.Today);}
             @foreach (var emp in Model)
             {
-                var today = DateOnly.FromDateTime(DateTime.Today);
                 <tr>
                     <td>@emp.EmployeeNo</td>
                     <td>@emp.FullName</td>
-                    <td>@emp.HireDate.ToString("yyyy/MM/dd")</td>
-                    <td>@emp.GetYearsOfService(today) 年</td>
+                    <td class="text-nowrap">@emp.HireDate.ToString("yyyy/MM/dd")</td>
+                    <td class="text-nowrap">@emp.GetServicePeriodText(today)</td>
                     <td>@emp.EmploymentType</td>
                     <td>@emp.PositionCategory</td>
-                    <td class="text-end">
+                    <td class="text-end text-nowrap">
                         <a asp-action="Edit" asp-route-id="@emp.EmployeeId" class="btn btn-sm btn-outline-secondary">編集</a>
                         <form asp-action="Deactivate" asp-route-id="@emp.EmployeeId" method="post" class="d-inline"
                               onsubmit="return confirm('@emp.FullName を退職処理しますか？')">
@@ -47,5 +141,5 @@
 </div>
 @if (!Model.Any())
 {
-    <p class="text-muted text-center py-4">社員が登録されていません。</p>
+    <p class="text-muted text-center py-4">該当する社員が見つかりません。</p>
 }

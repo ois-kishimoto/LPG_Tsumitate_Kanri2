@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace LPG_Tsumitate_Kanri2.Models.Entities;
 
@@ -37,7 +38,7 @@ public class ContributionAmountRule
     [Display(Name = "有効終了日")]
     public DateOnly? ValidTo { get; set; }
 
-    public SavingsType SavingsType { get; set; } = null!;
+    [ValidateNever] public SavingsType SavingsType { get; set; } = null!;
 
     public string ConditionSummary =>
         string.Join(" / ",

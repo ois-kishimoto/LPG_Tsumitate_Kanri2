@@ -11,7 +11,10 @@
         <form asp-action="Edit" asp-route-id="@Model.RuleId" method="post">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="RuleId" />
-            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            }
 
             <div class="mb-3">
                 <label asp-for="SavingsTypeId" class="form-label"></label>
