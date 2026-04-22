@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace LPG_Tsumitate_Kanri2.Models.Entities;
 
@@ -29,8 +30,8 @@ public class CollectionSession
     public bool IsCompleted { get; set; }
     public DateTime CreatedAt { get; set; }
 
-    public SavingsType SavingsType { get; set; } = null!;
-    public ICollection<CollectionRecord> CollectionRecords { get; set; } = new List<CollectionRecord>();
+    [ValidateNever] public SavingsType SavingsType { get; set; } = null!;
+    [ValidateNever] public ICollection<CollectionRecord> CollectionRecords { get; set; } = new List<CollectionRecord>();
 
     public string Label => $"{Year}年{Month}月分 {SavingsType?.Name}";
 }

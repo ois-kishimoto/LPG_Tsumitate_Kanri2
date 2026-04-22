@@ -11,13 +11,46 @@ public class EmployeesController : Controller
 
     public EmployeesController(AppDbContext db) => _db = db;
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(
+        string? search,
+        string? employmentType,
+        string? positionCategory,
+        string? sortBy,
+        string? sortDir)
     {
-        var employees = await _db.Employees
-            .Where(e => e.IsActive)
-            .OrderBy(e => e.EmployeeNo)
-            .ToListAsync();
-        return View(employees);
+        var query = _db.Employees.Where(e => e.IsActive).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+            query = query.Where(e => e.FullName.Contains(search) || e.EmployeeNo.Contains(search));
+        if (!string.IsNullOrWhiteSpace(employmentType))
+            query = query.Where(e => e.EmploymentType == employmentType);
+        if (!string.IsNullOrWhiteSpace(positionCategory))
+            query = query.Where(e => e.PositionCategory == positionCategory);
+
+        query = (sortBy, sortDir) switch
+        {
+            ("name",     "desc") => query.OrderByDescending(e => e.FullName),
+            ("name",     _)      => query.OrderBy(e => e.FullName),
+            ("hiredate", "desc") => query.OrderByDescending(e => e.HireDate),
+            ("hiredate", _)      => query.OrderBy(e => e.HireDate),
+            // 勤続年数昇順 = 入社日降順（新しいほど勤続短い）
+            ("service",  "desc") => query.OrderBy(e => e.HireDate),
+            ("service",  _)      => query.OrderByDescending(e => e.HireDate),
+            ("emptype",  "desc") => query.OrderByDescending(e => e.EmploymentType),
+            ("emptype",  _)      => query.OrderBy(e => e.EmploymentType),
+            ("position", "desc") => query.OrderByDescending(e => e.PositionCategory),
+            ("position", _)      => query.OrderBy(e => e.PositionCategory),
+            ("no",       "desc") => query.OrderByDescending(e => e.EmployeeNo),
+            _                    => query.OrderBy(e => e.EmployeeNo),
+        };
+
+        ViewBag.Search = search;
+        ViewBag.EmploymentType = employmentType;
+        ViewBag.PositionCategory = positionCategory;
+        ViewBag.SortBy = sortBy ?? "no";
+        ViewBag.SortDir = sortDir ?? "asc";
+
+        return View(await query.ToListAsync());
     }
 
     public IActionResult Create() => View(new Employee { HireDate = DateOnly.FromDateTime(DateTime.Today) });

@@ -12,7 +12,10 @@
             <input type="hidden" asp-for="EmployeeId" />
             <input type="hidden" asp-for="IsActive" />
             <input type="hidden" asp-for="CreatedAt" />
-            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            }
 
             <div class="mb-3">
                 <label asp-for="EmployeeNo" class="form-label"></label>
