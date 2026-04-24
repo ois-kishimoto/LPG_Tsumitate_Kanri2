@@ -45,6 +45,9 @@ public class HomeController : Controller
             .Include(s => s.SavingsType)
             .Include(s => s.CollectionRecords)
             .Where(s => !s.IsCompleted)
+            .OrderByDescending(s => s.Year)
+            .ThenByDescending(s => s.Month)
+            .ThenBy(s => s.SavingsType.DisplayOrder)
             .Select(s => new PendingCollectionAlert
             {
                 SessionId = s.SessionId,
