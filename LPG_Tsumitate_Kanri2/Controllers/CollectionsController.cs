@@ -265,4 +265,98 @@ public class CollectionsController : Controller
         TempData["Success"] = "締め切りを解除しました。再度チェックを変更できます。";
         return RedirectToAction(nameof(Details), new { id });
     }
+
+    public async Task<IActionResult> BulkRetirement()
+    {
+        var vm = new BulkRetirementViewModel
+        {
+            Candidates = await BuildCandidatesAsync()
+        };
+        return View(vm);
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> BulkRetirement(BulkRetirementViewModel input)
+    {
+        input.Candidates = await BuildCandidatesAsync();
+
+        if (!ModelState.IsValid)
+            return View(input);
+
+        var records = await _db.CollectionRecords
+            .Include(r => r.Session)
+            .Where(r => r.EmployeeId == input.EmployeeId
+                && r.Session.SavingsTypeId == 2
+                && !r.Session.IsCompleted
+                && !r.IsCollected
+                && !r.IsExcluded)
+            .OrderBy(r => r.Session.Year)
+            .ThenBy(r => r.Session.Month)
+            .ThenBy(r => r.RecordId)
+            .ToListAsync();
+
+        if (records.Count == 0)
+        {
+            ModelState.AddModelError(nameof(input.EmployeeId), "選択された社員には進行中の未徴収レコードがありません。");
+            return View(input);
+        }
+
+        var pendingTotal = records.Sum(r => r.ExpectedAmount);
+        if (input.Amount > pendingTotal)
+        {
+            ModelState.AddModelError(nameof(input.Amount),
+                $"未徴収合計({pendingTotal:N0} 円)を超えています。");
+            return View(input);
+        }
+
+        var consumed = new List<CollectionRecord>();
+        int remaining = input.Amount!.Value;
+        foreach (var r in records)
+        {
+            if (remaining == 0) break;
+            if (r.ExpectedAmount > remaining) break;
+            consumed.Add(r);
+            remaining -= r.ExpectedAmount;
+        }
+
+        if (remaining != 0)
+        {
+            ModelState.AddModelError(nameof(input.Amount),
+                "入力金額では古い未徴収から順にぴったり消し込めません。月額の組み合わせに合う金額を入力してください。");
+            return View(input);
+        }
+
+        var now = DateTime.Now;
+        foreach (var r in consumed)
+        {
+            r.IsCollected = true;
+            r.CollectedAt = now;
+        }
+        await _db.SaveChangesAsync();
+
+        TempData["BulkRetirementResult"] =
+            $"{consumed.Count} 件 / 合計 {input.Amount:N0} 円を消し込みました。";
+        return RedirectToAction(nameof(BulkRetirement));
+    }
+
+    private async Task<List<RetirementCandidate>> BuildCandidatesAsync()
+    {
+        return await _db.CollectionRecords
+            .Where(r => r.Session.SavingsTypeId == 2
+                && !r.Session.IsCompleted
+                && !r.IsCollected
+                && !r.IsExcluded
+                && r.Employee.IsActive
+                && !r.Employee.IsOnLeave)
+            .GroupBy(r => new { r.EmployeeId, r.Employee.EmployeeNo, r.Employee.FullName })
+            .Select(g => new RetirementCandidate
+            {
+                EmployeeId = g.Key.EmployeeId,
+                EmployeeNo = g.Key.EmployeeNo,
+                FullName = g.Key.FullName,
+                PendingTotal = g.Sum(r => r.ExpectedAmount)
+            })
+            .OrderBy(c => c.EmployeeNo)
+            .ToListAsync();
+    }
 }

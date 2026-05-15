@@ -1,0 +1,66 @@
+@model LPG_Tsumitate_Kanri2.Models.ViewModels.BulkRetirementViewModel
+@{
+    ViewData["Title"] = "還暦積立一括徴収";
+}
+
+<div class="d-flex flex-wrap gap-2 justify-content-between align-items-start mb-3">
+    <h2 class="mb-1">還暦積立一括徴収</h2>
+    <a asp-controller="Collections" asp-action="Index" class="btn btn-outline-secondary btn-sm">← 徴収管理に戻る</a>
+</div>
+
+@if (TempData["BulkRetirementResult"] is string msg)
+{
+    <div class="alert alert-success">@msg</div>
+}
+
+<p class="text-muted">
+    入力された金額を、選択した社員の<strong>進行中の還暦積立</strong>の<strong>古い月の未徴収</strong>から順に消し込みます。
+    未徴収レコードにぴったり一致する金額のみ受け付けます。
+</p>
+
+@if (!Model.Candidates.Any())
+{
+    <div class="alert alert-info mb-0">
+        進行中の還暦積立で未徴収を持つ社員がいません。
+    </div>
+}
+else
+{
+    <form asp-action="BulkRetirement" method="post" class="row g-3" style="max-width: 480px;">
+        @Html.AntiForgeryToken()
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="col-12">
+                <div asp-validation-summary="All" class="alert alert-danger mb-0"></div>
+            </div>
+        }
+        <div class="col-12">
+            <label asp-for="EmployeeId" class="form-label">社員</label>
+            <select asp-for="EmployeeId" class="form-select">
+                <option value="">選択してください</option>
+                @foreach (var c in Model.Candidates)
+                {
+                    <option value="@c.EmployeeId">
+                        @c.EmployeeNo　@c.FullName（未徴収 @c.PendingTotal.ToString("N0") 円）
+                    </option>
+                }
+            </select>
+            <span asp-validation-for="EmployeeId" class="text-danger"></span>
+        </div>
+        <div class="col-12">
+            <label asp-for="Amount" class="form-label">金額</label>
+            <div class="input-group">
+                <input asp-for="Amount" type="number" min="1" step="1" class="form-control" inputmode="numeric" />
+                <span class="input-group-text">円</span>
+            </div>
+            <span asp-validation-for="Amount" class="text-danger"></span>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">保存</button>
+        </div>
+    </form>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
