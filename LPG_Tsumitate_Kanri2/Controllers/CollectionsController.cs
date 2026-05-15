@@ -115,6 +115,7 @@ public class CollectionsController : Controller
                     IsExcluded = r.IsExcluded,
                     Notes = r.Notes
                 }).ToList(),
+            TotalExpected = session.CollectionRecords.Where(r => !r.IsExcluded).Sum(r => r.ExpectedAmount),
             TotalCollected = session.CollectionRecords.Where(r => r.IsCollected && !r.IsExcluded).Sum(r => r.ExpectedAmount),
             CollectedCount = session.CollectionRecords.Count(r => r.IsCollected && !r.IsExcluded),
             PendingCount = session.CollectionRecords.Count(r => !r.IsCollected && !r.IsExcluded),

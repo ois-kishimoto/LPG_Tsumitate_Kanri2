@@ -6,6 +6,7 @@ public class CollectionCheckViewModel
 {
     public CollectionSession Session { get; set; } = null!;
     public List<CollectionRecordRow> Records { get; set; } = new();
+    public int TotalExpected { get; set; }
     public int TotalCollected { get; set; }
     public int CollectedCount { get; set; }
     public int PendingCount { get; set; }

@@ -12,26 +12,24 @@
     <a asp-action="Index" class="btn btn-outline-secondary btn-sm">← 一覧に戻る</a>
 </div>
 
-<div class="row g-2 mb-4">
-    <div class="col-6 col-sm-auto">
+<div class="d-flex flex-wrap gap-2 mb-4 align-items-center">
+    <div class="card border-0 bg-light px-3 py-2 text-center">
+        <small class="text-muted">徴収予定金額</small>
+        <strong id="totalExpected">@Model.TotalExpected.ToString("N0") 円</strong>
+    </div>
+    <div class="d-flex flex-wrap gap-2 ms-md-auto">
         <div class="card border-0 bg-light px-3 py-2 text-center">
             <small class="text-muted">徴収済合計</small>
             <strong id="totalAmount">@Model.TotalCollected.ToString("N0") 円</strong>
         </div>
-    </div>
-    <div class="col-6 col-sm-auto">
         <div class="card border-0 bg-light px-3 py-2 text-center">
             <small class="text-muted">徴収済</small>
             <strong id="collectedCount" class="text-success">@Model.CollectedCount 人</strong>
         </div>
-    </div>
-    <div class="col-6 col-sm-auto">
         <div class="card border-0 bg-light px-3 py-2 text-center">
             <small class="text-muted">未徴収</small>
             <strong id="pendingCount" class="text-danger">@Model.PendingCount 人</strong>
         </div>
-    </div>
-    <div class="col-6 col-sm-auto">
         <div class="card border-0 bg-light px-3 py-2 text-center">
             <small class="text-muted">除外</small>
             <strong id="excludedCount" class="text-muted">@Model.ExcludedCount 人</strong>
@@ -205,12 +203,16 @@
     }
 
     function updateSummary() {
+        let totalExpected = 0;
         let total = 0, collected = 0, pending = 0, excluded = 0;
         document.querySelectorAll('.check-toggle').forEach(cb => {
             if (cb.disabled) { excluded++; return; }
+            totalExpected += parseInt(cb.dataset.amount);
             if (cb.checked) { total += parseInt(cb.dataset.amount); collected++; }
             else pending++;
         });
+        const expEl = document.getElementById('totalExpected');
+        if (expEl) expEl.textContent = totalExpected.toLocaleString() + ' 円';
         document.getElementById('totalAmount').textContent = total.toLocaleString() + ' 円';
         document.getElementById('collectedCount').textContent = collected + ' 人';
         document.getElementById('pendingCount').textContent = pending + ' 人';
